@@ -1,3 +1,4 @@
+'use client'
 import { Button } from "@/components/ui/button"
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card"
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs"
@@ -11,8 +12,10 @@ import { AddCarDialog } from "@/components/add-car-dialog"
 import { EditCarDialog } from "@/components/edit-car-dialog"
 import { DeleteCarDialog } from "@/components/delete-car-dialog"
 import Image from "next/image"
+import { useCarContext } from "@/Context/CarContext"
 
 export default function DashboardPage() {
+    const {cars, setCars} = useCarContext();
   return (
     <div className="grid min-h-screen w-full lg:grid-cols-[280px_1fr]">
       <AdminSidebar />
@@ -53,117 +56,11 @@ export default function DashboardPage() {
           </div>
           <Tabs defaultValue="overview">
             <TabsList className="mb-4">
-              <TabsTrigger value="overview">Overview</TabsTrigger>
               <TabsTrigger value="listings">Car Listings</TabsTrigger>
               <TabsTrigger value="orders">Orders</TabsTrigger>
               <TabsTrigger value="rental">Rental Applications</TabsTrigger>
             </TabsList>
-            <TabsContent value="overview" className="space-y-4">
-              <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-4">
-                <Card>
-                  <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-                    <CardTitle className="text-sm font-medium">Total Revenue</CardTitle>
-                    <DollarSign className="h-4 w-4 text-muted-foreground" />
-                  </CardHeader>
-                  <CardContent>
-                    <div className="text-2xl font-bold">$452,489.39</div>
-                    <p className="text-xs text-muted-foreground">+20.1% from last month</p>
-                  </CardContent>
-                </Card>
-                <Card>
-                  <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-                    <CardTitle className="text-sm font-medium">Cars Sold</CardTitle>
-                    <Car className="h-4 w-4 text-muted-foreground" />
-                  </CardHeader>
-                  <CardContent>
-                    <div className="text-2xl font-bold">+28</div>
-                    <p className="text-xs text-muted-foreground">+12% from last month</p>
-                  </CardContent>
-                </Card>
-                <Card>
-                  <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-                    <CardTitle className="text-sm font-medium">Rental Cars</CardTitle>
-                    <Package className="h-4 w-4 text-muted-foreground" />
-                  </CardHeader>
-                  <CardContent>
-                    <div className="text-2xl font-bold">43</div>
-                    <p className="text-xs text-muted-foreground">+7% from last month</p>
-                  </CardContent>
-                </Card>
-                <Card>
-                  <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-                    <CardTitle className="text-sm font-medium">Active Customers</CardTitle>
-                    <Users className="h-4 w-4 text-muted-foreground" />
-                  </CardHeader>
-                  <CardContent>
-                    <div className="text-2xl font-bold">+573</div>
-                    <p className="text-xs text-muted-foreground">+201 since last week</p>
-                  </CardContent>
-                </Card>
-              </div>
-              <div className="grid gap-4 grid-cols-1 md:grid-cols-2 lg:grid-cols-7">
-                <Card className="col-span-4">
-                  <CardHeader>
-                    <CardTitle>Sales Overview</CardTitle>
-                  </CardHeader>
-                  <CardContent>
-                    <div className="h-[200px] flex items-center justify-center text-muted-foreground">
-                      <BarChart3 className="h-16 w-16" />
-                    </div>
-                  </CardContent>
-                </Card>
-                <Card className="col-span-3">
-                  <CardHeader>
-                    <CardTitle>Recent Activity</CardTitle>
-                    <CardDescription>Recent sales and inquiries</CardDescription>
-                  </CardHeader>
-                  <CardContent>
-                    <div className="space-y-4">
-                      <div className="flex items-center gap-4">
-                        <div className="rounded-full bg-primary/10 p-2">
-                          <ShoppingCart className="h-4 w-4 text-primary" />
-                        </div>
-                        <div className="space-y-1">
-                          <p className="text-sm font-medium">New Order #1204</p>
-                          <p className="text-xs text-muted-foreground">BMW X5 - $76,500</p>
-                        </div>
-                        <div className="ml-auto text-xs text-muted-foreground">2h ago</div>
-                      </div>
-                      <div className="flex items-center gap-4">
-                        <div className="rounded-full bg-primary/10 p-2">
-                          <Users className="h-4 w-4 text-primary" />
-                        </div>
-                        <div className="space-y-1">
-                          <p className="text-sm font-medium">New Customer</p>
-                          <p className="text-xs text-muted-foreground">David Johnson joined</p>
-                        </div>
-                        <div className="ml-auto text-xs text-muted-foreground">5h ago</div>
-                      </div>
-                      <div className="flex items-center gap-4">
-                        <div className="rounded-full bg-primary/10 p-2">
-                          <Clock className="h-4 w-4 text-primary" />
-                        </div>
-                        <div className="space-y-1">
-                          <p className="text-sm font-medium">Rental Request</p>
-                          <p className="text-xs text-muted-foreground">Mercedes EQS - 7 days</p>
-                        </div>
-                        <div className="ml-auto text-xs text-muted-foreground">Yesterday</div>
-                      </div>
-                      <div className="flex items-center gap-4">
-                        <div className="rounded-full bg-primary/10 p-2">
-                          <Package className="h-4 w-4 text-primary" />
-                        </div>
-                        <div className="space-y-1">
-                          <p className="text-sm font-medium">New Car Added</p>
-                          <p className="text-xs text-muted-foreground">Tesla Model S - $89,999</p>
-                        </div>
-                        <div className="ml-auto text-xs text-muted-foreground">2d ago</div>
-                      </div>
-                    </div>
-                  </CardContent>
-                </Card>
-              </div>
-            </TabsContent>
+            
             <TabsContent value="listings" className="space-y-4">
               <Card>
                 <CardHeader className="flex flex-row items-center justify-between">
@@ -182,101 +79,24 @@ export default function DashboardPage() {
                       </TableRow>
                     </TableHeader>
                     <TableBody>
-                      <TableRow>
-                        <TableCell className="font-medium">Tesla Model S</TableCell>
-                        <TableCell>Electric</TableCell>
-                        <TableCell>$89,999</TableCell>
-                        <TableCell>
-                          <Badge className="bg-green-500">Available</Badge>
-                        </TableCell>
-                        <TableCell className="text-right flex justify-end gap-2">
-                          <EditCarDialog
-                            car={{
-                              name: "Tesla Model S",
-                              category: "Electric",
-                              price: 89999,
-                              status: "available",
-                            }}
-                          />
-                          <DeleteCarDialog carName="Tesla Model S" />
-                        </TableCell>
-                      </TableRow>
-                      <TableRow>
-                        <TableCell className="font-medium">BMW X5</TableCell>
-                        <TableCell>SUV</TableCell>
-                        <TableCell>$76,500</TableCell>
-                        <TableCell>
-                          <Badge className="bg-green-500">Available</Badge>
-                        </TableCell>
-                        <TableCell className="text-right flex justify-end gap-2">
-                          <EditCarDialog
-                            car={{
-                              name: "BMW X5",
-                              category: "SUV",
-                              price: 76500,
-                              status: "available",
-                            }}
-                          />
-                          <DeleteCarDialog carName="BMW X5" />
-                        </TableCell>
-                      </TableRow>
-                      <TableRow>
-                        <TableCell className="font-medium">Mercedes EQS</TableCell>
-                        <TableCell>Luxury</TableCell>
-                        <TableCell>$102,000</TableCell>
-                        <TableCell>
-                          <Badge className="bg-green-500">Available</Badge>
-                        </TableCell>
-                        <TableCell className="text-right flex justify-end gap-2">
-                          <EditCarDialog
-                            car={{
-                              name: "Mercedes EQS",
-                              category: "Luxury",
-                              price: 102000,
-                              status: "available",
-                            }}
-                          />
-                          <DeleteCarDialog carName="Mercedes EQS" />
-                        </TableCell>
-                      </TableRow>
-                      <TableRow>
-                        <TableCell className="font-medium">Audi e-tron GT</TableCell>
-                        <TableCell>Electric</TableCell>
-                        <TableCell>$99,800</TableCell>
-                        <TableCell>
-                          <Badge variant="outline">Reserved</Badge>
-                        </TableCell>
-                        <TableCell className="text-right flex justify-end gap-2">
-                          <EditCarDialog
-                            car={{
-                              name: "Audi e-tron GT",
-                              category: "Electric",
-                              price: 99800,
-                              status: "reserved",
-                            }}
-                          />
-                          <DeleteCarDialog carName="Audi e-tron GT" />
-                        </TableCell>
-                      </TableRow>
-                      <TableRow>
-                        <TableCell className="font-medium">Porsche 911</TableCell>
-                        <TableCell>Sports</TableCell>
-                        <TableCell>$115,000</TableCell>
-                        <TableCell>
-                          <Badge className="bg-green-500">Available</Badge>
-                        </TableCell>
-                        <TableCell className="text-right flex justify-end gap-2">
-                          <EditCarDialog
-                            car={{
-                              name: "Porsche 911",
-                              category: "Sports",
-                              price: 115000,
-                              status: "available",
-                            }}
-                          />
-                          <DeleteCarDialog carName="Porsche 911" />
-                        </TableCell>
-                      </TableRow>
+                      {cars.map((car: any) => (
+                          <TableRow>
+                            <TableCell className="font-medium">{car.model}</TableCell>
+                            <TableCell>{car.category}</TableCell>
+                            <TableCell>{car.price}</TableCell>
+                            <TableCell>
+                              <Badge className="bg-green-500">{car.status}</Badge>
+                            </TableCell>
+                            <TableCell className="text-right flex justify-end gap-2">
+                              <EditCarDialog
+                                car={car}
+                              />
+                              <DeleteCarDialog carName="Tesla Model S" />
+                            </TableCell>
+                          </TableRow>
+                      ))}
+                      
+                      
                     </TableBody>
                   </Table>
                 </CardContent>
