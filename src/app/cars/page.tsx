@@ -10,7 +10,7 @@ import Header from "@/components/Header"
 import Footer from "@/components/Footer"
 import { useCarContext } from "@/Context/CarContext"
 import { Suspense } from "react"
-import Loading from "./Loading"
+
 
 
 type CarValues = {
@@ -64,7 +64,7 @@ export default function CarsPage() {
                 </div>
               </div>
               <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-                <Suspense fallback={<Loading />}> 
+                <Suspense fallback={<div>Loading...</div>}> 
                   {cars?.map((car: CarValues) => (
                     <CarCard
                       key={car.id}

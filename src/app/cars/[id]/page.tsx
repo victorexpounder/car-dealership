@@ -8,6 +8,7 @@ import { Calendar, Car, ChevronRight, Clock, Fuel, Gauge, Info, MapPin, Shield, 
 import CarCard from "@/components/car-card"
 import { createClient } from "@supabase/supabase-js"
 import { anonkey, supabaseUrl } from "@/lib/supabase"
+import { useEffect, useState } from "react"
 
 type CarValues = {
     id: string
@@ -21,7 +22,7 @@ type CarValues = {
     mileage: number
     status: string
     description: string
-    location: "Lagos, Nigeria",
+    location: string,
     isNew: boolean,
     features: string[],
     specifications: {
@@ -121,8 +122,14 @@ const getRelatedCars = () => {
 }
 
 export default function CarDetailsPage({ params }: { params: { id: string } }) {
-  const car: CarValues = getCar(params.id)
+  const [car, setCar] = useState<CarValues | null>(null)
   const relatedCars = getRelatedCars()
+
+  useEffect(()=>{
+    getCar(params.id).then((car) => {
+      setCar(car)
+    })
+  }, [params.id])
 
   return (
     <div className="flex min-h-screen flex-col">
@@ -179,7 +186,7 @@ export default function CarDetailsPage({ params }: { params: { id: string } }) {
               Cars
             </Link>
             <ChevronRight className="h-4 w-4" />
-            <span className="text-foreground">{car.model}</span>
+            <span className="text-foreground">{car?.model}</span>
           </div>
 
           <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
@@ -187,20 +194,20 @@ export default function CarDetailsPage({ params }: { params: { id: string } }) {
             <div className="lg:col-span-2 space-y-8">
               {/* Main Image */}
               <div className="relative aspect-[4/3] overflow-hidden rounded-lg border">
-                <Image src={car.images[0] || "/placeholder.svg"} alt={car.name} fill className="object-cover" />
-                {car.isNew && <Badge className="absolute right-3 top-3 z-10">NEW</Badge>}
+                <Image src={car?.images[0] || "/placeholder.svg"} alt={car?.model || 'carimage'} fill className="object-cover" />
+                {car?.isNew && <Badge className="absolute right-3 top-3 z-10">NEW</Badge>}
               </div>
 
               {/* Thumbnail Images */}
               <div className="grid grid-cols-4 gap-2">
-                {car.images.map((image, index) => (
+                {car?.images.map((image, index) => (
                   <div
                     key={index}
                     className={`aspect-[4/3] overflow-hidden rounded-md border ${index === 0 ? "ring-2 ring-primary" : ""}`}
                   >
                     <Image
                       src={image || "/placeholder.svg"}
-                      alt={`${car.name} - View ${index + 1}`}
+                      alt={`${car?.model} - View ${index + 1}`}
                       width={200}
                       height={150}
                       className="h-full w-full object-cover cursor-pointer hover:opacity-90 transition-opacity"
@@ -221,17 +228,17 @@ export default function CarDetailsPage({ params }: { params: { id: string } }) {
                 <TabsContent value="overview" className="pt-4">
                   <div className="space-y-4">
                     <h2 className="text-xl font-semibold">Description</h2>
-                    <p className="text-gray-600">{car.description}</p>
+                    <p className="text-gray-600">{car?.description}</p>
 
                     <div className="grid grid-cols-2 md:grid-cols-4 gap-4 pt-4">
                       <div className="flex flex-col items-center justify-center p-4 bg-muted rounded-lg">
                         <Calendar className="h-6 w-6 text-primary mb-2" />
-                        <span className="text-sm font-medium">{car.year}</span>
+                        <span className="text-sm font-medium">{car?.year}</span>
                         <span className="text-xs text-muted-foreground">Year</span>
                       </div>
                       <div className="flex flex-col items-center justify-center p-4 bg-muted rounded-lg">
                         <Gauge className="h-6 w-6 text-primary mb-2" />
-                        <span className="text-sm font-medium">{car.mileage.toLocaleString()} mi</span>
+                        <span className="text-sm font-medium">{car?.mileage.toLocaleString()} mi</span>
                         <span className="text-xs text-muted-foreground">Mileage</span>
                       </div>
                       <div className="flex flex-col items-center justify-center p-4 bg-muted rounded-lg">
@@ -241,7 +248,7 @@ export default function CarDetailsPage({ params }: { params: { id: string } }) {
                       </div>
                       <div className="flex flex-col items-center justify-center p-4 bg-muted rounded-lg">
                         <MapPin className="h-6 w-6 text-primary mb-2" />
-                        <span className="text-sm font-medium">{car.location}</span>
+                        <span className="text-sm font-medium">{car?.location}</span>
                         <span className="text-xs text-muted-foreground">Location</span>
                       </div>
                     </div>
@@ -255,37 +262,37 @@ export default function CarDetailsPage({ params }: { params: { id: string } }) {
                       <div className="space-y-2">
                         <div className="flex justify-between py-2 border-b">
                           <span className="text-muted-foreground">Engine</span>
-                          <span className="font-medium">{car.specifications.engine}</span>
+                          <span className="font-medium">{car?.specifications.engine}</span>
                         </div>
                         <div className="flex justify-between py-2 border-b">
                           <span className="text-muted-foreground">Horsepower</span>
-                          <span className="font-medium">{car.specifications.horsepower}</span>
+                          <span className="font-medium">{car?.specifications.horsepower}</span>
                         </div>
                         <div className="flex justify-between py-2 border-b">
                           <span className="text-muted-foreground">Acceleration</span>
-                          <span className="font-medium">{car.specifications.acceleration}</span>
+                          <span className="font-medium">{car?.specifications.acceleration}</span>
                         </div>
                         <div className="flex justify-between py-2 border-b">
                           <span className="text-muted-foreground">Top Speed</span>
-                          <span className="font-medium">{car.specifications.topSpeed}</span>
+                          <span className="font-medium">{car?.specifications.topSpeed}</span>
                         </div>
                       </div>
                       <div className="space-y-2">
                         <div className="flex justify-between py-2 border-b">
                           <span className="text-muted-foreground">Range</span>
-                          <span className="font-medium">{car.specifications.range}</span>
+                          <span className="font-medium">{car?.specifications.range}</span>
                         </div>
                         <div className="flex justify-between py-2 border-b">
                           <span className="text-muted-foreground">Seating</span>
-                          <span className="font-medium">{car.specifications.seating}</span>
+                          <span className="font-medium">{car?.specifications.seating}</span>
                         </div>
                         <div className="flex justify-between py-2 border-b">
                           <span className="text-muted-foreground">Cargo Space</span>
-                          <span className="font-medium">{car.specifications.cargo}</span>
+                          <span className="font-medium">{car?.specifications.cargo}</span>
                         </div>
                         <div className="flex justify-between py-2 border-b">
                           <span className="text-muted-foreground">Weight</span>
-                          <span className="font-medium">{car.specifications.weight}</span>
+                          <span className="font-medium">{car?.specifications.weight}</span>
                         </div>
                       </div>
                     </div>
@@ -296,7 +303,7 @@ export default function CarDetailsPage({ params }: { params: { id: string } }) {
                   <div className="space-y-4">
                     <h2 className="text-xl font-semibold">Key Features</h2>
                     <div className="grid grid-cols-1 md:grid-cols-2 gap-2">
-                      {car.features.map((feature, index) => (
+                      {car?.features.map((feature, index) => (
                         <div key={index} className="flex items-center gap-2 py-2">
                           <div className="flex-shrink-0 h-5 w-5 rounded-full bg-primary/10 flex items-center justify-center">
                             <Check className="h-3 w-3 text-primary" />
@@ -317,12 +324,12 @@ export default function CarDetailsPage({ params }: { params: { id: string } }) {
                           {[...Array(5)].map((_, i) => (
                             <Star
                               key={i}
-                              className={`h-5 w-5 ${i < Math.floor(car.rating) ? "fill-primary text-primary" : "text-muted"}`}
+                              className={`h-5 w-5 ${i < Math.floor(car?.rating || 3) ? "fill-primary text-primary" : "text-muted"}`}
                             />
                           ))}
                         </div>
-                        <span className="font-medium">{car.rating}/5</span>
-                        <span className="text-muted-foreground">({car.reviewCount} reviews)</span>
+                        <span className="font-medium">{car?.rating}/5</span>
+                        <span className="text-muted-foreground">({car?.reviewCount} reviews)</span>
                       </div>
                     </div>
 
@@ -390,18 +397,18 @@ export default function CarDetailsPage({ params }: { params: { id: string } }) {
               {/* Price Card */}
               <div className="border rounded-lg p-6 space-y-4 sticky top-24">
                 <div className="space-y-2">
-                  <h1 className="text-2xl font-bold">{car.name}</h1>
+                  <h1 className="text-2xl font-bold">{car?.model}</h1>
                   <div className="flex items-center gap-2">
-                    <Badge variant={car.status === "available" ? "default" : "outline"}>
-                      {car.status === "available" ? "Available" : "Reserved"}
+                    <Badge variant={car?.status === "available" ? "default" : "outline"}>
+                      {car?.status === "available" ? "Available" : "Reserved"}
                     </Badge>
-                    {car.isNew && <Badge variant="outline">New Arrival</Badge>}
+                    {car?.isNew && <Badge variant="outline">New Arrival</Badge>}
                   </div>
                 </div>
 
                 <div className="flex items-center justify-between py-4 border-y">
                   <span className="text-muted-foreground">Price</span>
-                  <span className="text-3xl font-bold">${car.price.toLocaleString()}</span>
+                  <span className="text-3xl font-bold">${car?.price.toLocaleString()}</span>
                 </div>
 
                 <div className="space-y-3">
