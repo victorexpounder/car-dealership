@@ -1,3 +1,4 @@
+'use client'
 import type React from "react"
 import Link from "next/link"
 import Image from "next/image"
@@ -8,7 +9,7 @@ import { Calendar, Car, ChevronRight, Clock, Fuel, Gauge, Info, MapPin, Shield, 
 import CarCard from "@/components/car-card"
 import { createClient } from "@supabase/supabase-js"
 import { anonkey, supabaseUrl } from "@/lib/supabase"
-import { useEffect, useState } from "react"
+import { use, useEffect, useState } from "react"
 
 type CarValues = {
     id: string
@@ -121,15 +122,20 @@ const getRelatedCars = () => {
   ]
 }
 
-export default function CarDetailsPage({ params }: { params: { id: string } }) {
+interface Params {
+  id: string
+}
+
+export default function CarDetailsPage(params: Params) {
   const [car, setCar] = useState<CarValues | null>(null)
   const relatedCars = getRelatedCars()
-
+  const id = params.id
+  
   useEffect(()=>{
-    getCar(params.id).then((car) => {
+    getCar(id).then((car) => {
       setCar(car)
     })
-  }, [params.id])
+  }, [id])
 
   return (
     <div className="flex min-h-screen flex-col">
