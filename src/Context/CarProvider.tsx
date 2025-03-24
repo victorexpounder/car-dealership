@@ -21,7 +21,7 @@ const CarProvider = ({ children } : any) => {
 
   useEffect(() => {
     fetchCars();
-  })
+  }, [])
   return (
     <CarContext.Provider value={{cars,  setCars }}>
       {children}

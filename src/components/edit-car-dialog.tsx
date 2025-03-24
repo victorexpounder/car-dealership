@@ -18,10 +18,11 @@ import { Input } from "@/components/ui/input"
 import { Label } from "@/components/ui/label"
 import { Textarea } from "@/components/ui/textarea"
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select"
-import { Edit, Loader2, Upload } from "lucide-react"
+import { Edit, Loader2, Upload, X } from "lucide-react"
 import { Form, FormControl, FormField, FormItem, FormLabel, FormMessage } from "@/components/ui/form"
 import { anonkey, supabaseUrl } from "@/lib/supabase"
 import { createClient } from "@supabase/supabase-js"
+import Image from "next/image"
 
 interface EditCarDialogProps {
   car: {
@@ -34,6 +35,7 @@ interface EditCarDialogProps {
     mileage?: number
     status: string
     description?: string
+    images: string[]
   }
 }
 
@@ -51,7 +53,8 @@ type CarFormValues = {
 export function EditCarDialog({ car }: EditCarDialogProps) {
   const [isSubmitting, setIsSubmitting] = useState(false)
   const [open, setOpen] = useState(false)
-  const [files, setFiles] = useState<FileList | null>(null)
+  const [existingImages, setExistingImages] = useState<string[]>(car.images); // Store current images
+  const [newImages, setNewImages] = useState<File[]>([]);
   const supabase = createClient(supabaseUrl, anonkey);
 
   const form = useForm<CarFormValues>({
@@ -67,38 +70,86 @@ export function EditCarDialog({ car }: EditCarDialogProps) {
     },
   })
 
-  const handleFileChange = (e: React.ChangeEvent<HTMLInputElement>) => {
-    if (e.target.files) {
-      setFiles(e.target.files)
+  // Handle image deletion
+  const handleRemoveImage = async (url: string) => {
+    setExistingImages(existingImages.filter((img) => img !== url));
+
+    // Extract public ID from the Cloudinary URL
+    const publicId = url.split("/").pop()?.split(".")[0];
+
+    if (publicId) {
+      try {
+        await fetch(`/api/delete-image`, {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({ publicId }),
+        });
+      } catch (error) {
+        console.error("Error deleting image:", error);
+      }
     }
-  }
+  };
 
-  
+  // Handle new file selection
+  const handleFileChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    if (!e.target.files) return;
 
-  const onSubmit = form.handleSubmit(async(values) => {
-    setIsSubmitting(true)
-    
+    const selectedFiles = Array.from(e.target.files);
 
-    const { data, error } = await supabase
-    .from('cars')
-    .update(values)
-    .eq('id', car.id)
-    .select()
+    // Ensure a max of 3 images at any time
+    if (existingImages.length + newImages.length + selectedFiles.length > 3) {
+      alert("You can only upload a maximum of 3 images.");
+      return;
+    }
+
+    setNewImages([...newImages, ...selectedFiles]);
+  };
+
+  // Upload new images to Cloudinary
+  const uploadNewImages = async () => {
+    const uploadPromises = newImages.map(async (file) => {
+      const formData = new FormData();
+      formData.append("file", file);
+      formData.append("upload_preset", "default2");
+
+      try {
+        const res = await fetch("https://api.cloudinary.com/v1_1/dcr8jrvub/image/upload", {
+          method: "POST",
+          body: formData,
+        });
+
+        const data = await res.json();
+        return data.secure_url; // Return uploaded image URL
+      } catch (error) {
+        console.error("Upload failed:", error);
+        return null;
+      }
+    });
+
+    return Promise.all(uploadPromises);
+  };
+
+  // Submit form
+  const onSubmit = form.handleSubmit(async (values) => {
+    setIsSubmitting(true);
+
+    // Upload new images
+    const uploadedUrls = await uploadNewImages();
+    const finalImages = [...existingImages, ...uploadedUrls.filter(Boolean)];
+
+    const updatedValues = { ...values, images: finalImages };
+
+    const { data, error } = await supabase.from("cars").update(updatedValues).eq("id", car.id);
 
     if (error) {
-      console.log(error)
-      setIsSubmitting(false)
-      return
+      console.log(error);
+      setIsSubmitting(false);
+      return;
     }
-    
 
-
-    // Simulate form submission
-    setTimeout(() => {
-      setIsSubmitting(false)
-      setOpen(false)
-    }, 1500)
-  })
+    setIsSubmitting(false);
+    setOpen(false);
+  });
 
   return (
     <Dialog open={open} onOpenChange={setOpen}>
@@ -108,7 +159,7 @@ export function EditCarDialog({ car }: EditCarDialogProps) {
           <span className="sr-only">Edit</span>
         </Button>
       </DialogTrigger>
-      <DialogContent className="sm:max-w-[600px]">
+      <DialogContent className="sm:max-w-[600px] h-[80%] overflow-scroll">
         <DialogHeader>
           <DialogTitle>Edit Car</DialogTitle>
           <DialogDescription>Update the details of {car.model}.</DialogDescription>
@@ -292,26 +343,36 @@ export function EditCarDialog({ car }: EditCarDialogProps) {
             <div className="space-y-2">
               <Label htmlFor="edit-image">Car Images</Label>
               <div className="border-2 border-dashed rounded-md p-6 flex flex-col items-center justify-center gap-2">
-                <div className="flex items-center gap-2 mb-2">
-                  <div className="h-16 w-16 rounded bg-muted flex items-center justify-center">
-                    <img
-                      src="/placeholder.svg?height=64&width=64"
-                      alt="Car thumbnail"
-                      className="h-full w-full object-cover rounded"
-                    />
-                  </div>
-                  <div className="h-16 w-16 rounded bg-muted flex items-center justify-center">
-                    <img
-                      src="/placeholder.svg?height=64&width=64"
-                      alt="Car thumbnail"
-                      className="h-full w-full object-cover rounded"
-                    />
-                  </div>
+                <div className="grid grid-cols-3 gap-2">
+                  {existingImages.map((img, index) => (
+                    <div key={index} className="relative">
+                      <Image src={img} width={100} height={100} alt="Car Image" className="rounded" />
+                      <button
+                        type="button"
+                        onClick={() => handleRemoveImage(img)}
+                        className="absolute top-0 right-0 bg-black bg-opacity-50 p-1 rounded-full"
+                      >
+                        <X className="text-white w-4 h-4" />
+                      </button>
+                    </div>
+                  ))}
+
+                  {newImages.map((file, index) => (
+                    <div key={index} className="relative">
+                      <Image
+                        src={URL.createObjectURL(file)}
+                        width={100}
+                        height={100}
+                        alt="New Image"
+                        className="rounded"
+                      />
+                    </div>
+                  ))}
                 </div>
                 <Upload className="h-8 w-8 text-muted-foreground" />
                 <p className="text-sm text-muted-foreground">
-                  {files && files.length > 0
-                    ? `${files.length} new file(s) selected`
+                  {existingImages && (existingImages.length+newImages.length) > 0
+                    ? `${existingImages.length+newImages.length} new file(s) selected`
                     : "Drag & drop new images here or click to browse"}
                 </p>
                 <Input id="edit-image" type="file" multiple className="hidden" onChange={handleFileChange} />

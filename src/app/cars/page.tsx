@@ -8,9 +8,27 @@ import CarCard from "@/components/car-card"
 import CarFilterForm from "@/components/car-filter-frorm"
 import Header from "@/components/Header"
 import Footer from "@/components/Footer"
+import { useCarContext } from "@/Context/CarContext"
+import { Suspense } from "react"
+import Loading from "./Loading"
 
+
+type CarValues = {
+  id: string
+  images: string[]
+  model: string
+  make: string
+  category: string
+  year: number
+  price: number
+  seater: string
+  mileage: number
+  status: string
+  description: string
+}
 
 export default function CarsPage() {
+  const {cars, setCars} = useCarContext()
   return (
     <div className="flex min-h-screen flex-col">
       <Header current="cars" />
@@ -46,72 +64,20 @@ export default function CarsPage() {
                 </div>
               </div>
               <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-                <CarCard
-                  image="/placeholder.svg?height=300&width=400"
-                  name="Tesla Model S"
-                  year={2023}
-                  price={89999}
-                  mileage={0}
-                  isNew={true}
-                />
-                <CarCard
-                  image="/placeholder.svg?height=300&width=400"
-                  name="BMW X5"
-                  year={2023}
-                  price={76500}
-                  mileage={120}
-                  isNew={true}
-                />
-                <CarCard
-                  image="/placeholder.svg?height=300&width=400"
-                  name="Mercedes EQS"
-                  year={2023}
-                  price={102000}
-                  mileage={0}
-                  isNew={true}
-                />
-                <CarCard
-                  image="/placeholder.svg?height=300&width=400"
-                  name="Audi e-tron GT"
-                  year={2022}
-                  price={99800}
-                  mileage={1200}
-                />
-                <CarCard
-                  image="/placeholder.svg?height=300&width=400"
-                  name="Porsche 911"
-                  year={2022}
-                  price={115000}
-                  mileage={800}
-                />
-                <CarCard
-                  image="/placeholder.svg?height=300&width=400"
-                  name="BMW i4"
-                  year={2022}
-                  price={65900}
-                  mileage={500}
-                />
-                <CarCard
-                  image="/placeholder.svg?height=300&width=400"
-                  name="Lexus LS"
-                  year={2021}
-                  price={71200}
-                  mileage={8500}
-                />
-                <CarCard
-                  image="/placeholder.svg?height=300&width=400"
-                  name="Range Rover Sport"
-                  year={2022}
-                  price={87450}
-                  mileage={3200}
-                />
-                <CarCard
-                  image="/placeholder.svg?height=300&width=400"
-                  name="Genesis G80"
-                  year={2021}
-                  price={58900}
-                  mileage={5600}
-                />
+                <Suspense fallback={<Loading />}> 
+                  {cars?.map((car: CarValues) => (
+                    <CarCard
+                      key={car.id}
+                      image={car?.images[0]}
+                      name={car.model}
+                      year={car.year}
+                      price={car.price}
+                      mileage={car.mileage}
+                      isNew={true}
+                    />
+                  ))}
+                </Suspense>
+                
               </div>
               <div className="flex items-center justify-center mt-8">
                 <div className="flex items-center space-x-2">

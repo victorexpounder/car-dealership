@@ -79,8 +79,8 @@ export default function DashboardPage() {
                       </TableRow>
                     </TableHeader>
                     <TableBody>
-                      {cars.map((car: any) => (
-                          <TableRow>
+                      {cars.map((car: any, index:number) => (
+                          <TableRow key={index}>
                             <TableCell className="font-medium">{car.model}</TableCell>
                             <TableCell>{car.category}</TableCell>
                             <TableCell>{car.price}</TableCell>
